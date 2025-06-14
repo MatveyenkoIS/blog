@@ -1,0 +1,53 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890",
+    "name": "Blog API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create User",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"test_user\",\n    \"email\": \"test@example.com\"\n}"
+        },
+        "url": "http://localhost:5000/users"
+      }
+    },
+    {
+      "name": "Create Post",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"title\": \"First Post\",\n    \"content\": \"Hello World!\",\n    \"author_id\": 1\n}"
+        },
+        "url": "http://localhost:5000/posts"
+      }
+    },
+    {
+      "name": "Get Post",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://localhost:5000/posts/1"
+      }
+    },
+    {
+      "name": "Create Comment",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"content\": \"Nice post!\",\n    \"post_id\": 1,\n    \"author_id\": 1\n}"
+        },
+        "url": "http://localhost:5000/comments"
+      }
+    }
+  ]
+}
