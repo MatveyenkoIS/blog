@@ -18,6 +18,30 @@
       }
     },
     {
+      "name": "Get All Users",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://localhost:5000/users"
+      }
+    },
+    {
+      "name": "Get User by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://localhost:5000/users/1"
+      }
+    },
+    {
+      "name": "Delete User",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "http://localhost:5000/users/1"
+      }
+    },
+    {
       "name": "Create Post",
       "request": {
         "method": "POST",
@@ -30,9 +54,25 @@
       }
     },
     {
-      "name": "Get Post",
+      "name": "Get All Posts",
       "request": {
         "method": "GET",
+        "header": [],
+        "url": "http://localhost:5000/posts"
+      }
+    },
+    {
+      "name": "Get Post by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://localhost:5000/posts/1"
+      }
+    },
+    {
+      "name": "Delete Post",
+      "request": {
+        "method": "DELETE",
         "header": [],
         "url": "http://localhost:5000/posts/1"
       }
@@ -47,6 +87,30 @@
           "raw": "{\n    \"content\": \"Nice post!\",\n    \"post_id\": 1,\n    \"author_id\": 1\n}"
         },
         "url": "http://localhost:5000/comments"
+      }
+    },
+    {
+      "name": "Get All Comments",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://localhost:5000/comments"
+      }
+    },
+    {
+      "name": "Get Comment by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://localhost:5000/comments/1"
+      }
+    },
+    {
+      "name": "Delete Comment",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "http://localhost:5000/comments/1"
       }
     }
   ]

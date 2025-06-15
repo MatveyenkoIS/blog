@@ -1,5 +1,6 @@
 attrs==25.3.0
 blinker==1.9.0
+-e git+https://github.com/MatveyenkoIS/blog.git@ea7aac3709d924b5e8e003e97b67cb3b2f67058f#egg=blog
 click==8.2.1
 colorama==0.4.6
 flasgger==0.9.7.1

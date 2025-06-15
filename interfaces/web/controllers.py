@@ -3,7 +3,15 @@ from application.use_cases import (
     CreateUserUseCase, 
     CreatePostUseCase, 
     CreateCommentUseCase, 
-    GetPostUseCase
+    GetPostUseCase,
+    GetAllUsersUseCase,
+    GetUserByIdUseCase,
+    DeleteUserUseCase,
+    GetAllPostsUseCase,
+    DeletePostUseCase,
+    GetAllCommentsUseCase,
+    GetCommentByIdUseCase,
+    DeleteCommentUseCase
 )
 from infrastructure.repositories import (
     SQLUserRepository, 
@@ -21,6 +29,14 @@ create_user_uc = CreateUserUseCase(user_repo)
 create_post_uc = CreatePostUseCase(post_repo, user_repo)
 create_comment_uc = CreateCommentUseCase(comment_repo, post_repo, user_repo)
 get_post_uc = GetPostUseCase(post_repo)
+get_all_users_uc = GetAllUsersUseCase(user_repo)
+get_user_by_id_uc = GetUserByIdUseCase(user_repo)
+delete_user_uc = DeleteUserUseCase(user_repo)
+get_all_posts_uc = GetAllPostsUseCase(post_repo)
+delete_post_uc = DeletePostUseCase(post_repo)
+get_all_comments_uc = GetAllCommentsUseCase(comment_repo)
+get_comment_by_id_uc = GetCommentByIdUseCase(comment_repo)
+delete_comment_uc = DeleteCommentUseCase(comment_repo)
 
 
 @bp.route('/')
@@ -98,6 +114,54 @@ def create_user():
 
 @bp.route('/posts', methods=['POST'])
 def create_post():
+    """
+    Create a new post
+    ---
+    tags:
+      - posts
+    parameters:
+      - in: body
+        name: body
+        schema:
+          type: object
+          required:
+            - title
+            - content
+            - author_id
+          properties:
+            title:
+              type: string
+              example: First Post
+            content:
+              type: string
+              example: Hello World!
+            author_id:
+              type: integer
+              example: 1
+    responses:
+      201:
+        description: Post created
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+            title:
+              type: string
+            content:
+              type: string
+            author_id:
+              type: integer
+      400:
+        description: Invalid input
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+      500:
+        description: Internal server error
+    """
     data = request.json
     try:
         post = create_post_uc.execute(
@@ -211,3 +275,246 @@ def create_comment():
         'post_id': comment.post_id,
         'author_id': comment.author_id
     }), 201
+
+@bp.route('/users', methods=['GET'])
+def get_all_users():
+    """
+    Get all users
+    ---
+    tags:
+      - users
+    responses:
+      200:
+        description: List of users
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              username:
+                type: string
+              email:
+                type: string
+    """
+    users = get_all_users_uc.execute()
+    return jsonify([{
+        'id': u.id,
+        'username': u.username,
+        'email': u.email
+    } for u in users])
+
+@bp.route('/users/<int:user_id>', methods=['GET'])
+def get_user(user_id):
+    """
+    Get a user by ID
+    ---
+    tags:
+      - users
+    parameters:
+      - name: user_id
+        in: path
+        type: integer
+        required: true
+    responses:
+      200:
+        description: User found
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+            username:
+              type: string
+            email:
+              type: string
+      404:
+        description: User not found
+    """
+    user = get_user_by_id_uc.execute(user_id)
+    if user:
+        return jsonify({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email
+        })
+    return jsonify({'error': 'User not found'}), 404
+
+@bp.route('/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    """
+    Delete a user by ID
+    ---
+    tags:
+      - users
+    parameters:
+      - name: user_id
+        in: path
+        type: integer
+        required: true
+    responses:
+      204:
+        description: User deleted
+      404:
+        description: User not found
+    """
+    user = get_user_by_id_uc.execute(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    delete_user_uc.execute(user_id)
+    return '', 204
+
+@bp.route('/posts', methods=['GET'])
+def get_all_posts():
+    """
+    Get all posts
+    ---
+    tags:
+      - posts
+    responses:
+      200:
+        description: List of posts
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              title:
+                type: string
+              content:
+                type: string
+              author_id:
+                type: integer
+    """
+    posts = get_all_posts_uc.execute()
+    return jsonify([{
+        'id': p.id,
+        'title': p.title,
+        'content': p.content,
+        'author_id': p.author_id
+    } for p in posts])
+
+@bp.route('/posts/<int:post_id>', methods=['DELETE'])
+def delete_post(post_id):
+    """
+    Delete a post by ID
+    ---
+    tags:
+      - posts
+    parameters:
+      - name: post_id
+        in: path
+        type: integer
+        required: true
+    responses:
+      204:
+        description: Post deleted
+      404:
+        description: Post not found
+    """
+    post = get_post_uc.execute(post_id)
+    if not post:
+        return jsonify({'error': 'Post not found'}), 404
+    
+    delete_post_uc.execute(post_id)
+    return '', 204
+
+@bp.route('/comments', methods=['GET'])
+def get_all_comments():
+    """
+    Get all comments
+    ---
+    tags:
+      - comments
+    responses:
+      200:
+        description: List of comments
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              content:
+                type: string
+              post_id:
+                type: integer
+              author_id:
+                type: integer
+    """
+    comments = get_all_comments_uc.execute()
+    return jsonify([{
+        'id': c.id,
+        'content': c.content,
+        'post_id': c.post_id,
+        'author_id': c.author_id
+    } for c in comments])
+
+@bp.route('/comments/<int:comment_id>', methods=['GET'])
+def get_comment(comment_id):
+    """
+    Get a comment by ID
+    ---
+    tags:
+      - comments
+    parameters:
+      - name: comment_id
+        in: path
+        type: integer
+        required: true
+    responses:
+      200:
+        description: Comment found
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+            content:
+              type: string
+            post_id:
+              type: integer
+            author_id:
+              type: integer
+      404:
+        description: Comment not found
+    """
+    comment = get_comment_by_id_uc.execute(comment_id)
+    if comment:
+        return jsonify({
+            'id': comment.id,
+            'content': comment.content,
+            'post_id': comment.post_id,
+            'author_id': comment.author_id
+        })
+    return jsonify({'error': 'Comment not found'}), 404
+
+@bp.route('/comments/<int:comment_id>', methods=['DELETE'])
+def delete_comment(comment_id):
+    """
+    Delete a comment by ID
+    ---
+    tags:
+      - comments
+    parameters:
+      - name: comment_id
+        in: path
+        type: integer
+        required: true
+    responses:
+      204:
+        description: Comment deleted
+      404:
+        description: Comment not found
+    """
+    comment = get_comment_by_id_uc.execute(comment_id)
+    if not comment:
+        return jsonify({'error': 'Comment not found'}), 404
+    
+    delete_comment_uc.execute(comment_id)
+    return '', 204

@@ -5,7 +5,15 @@ from application.use_cases import (
     CreateUserUseCase, 
     CreatePostUseCase, 
     CreateCommentUseCase,
-    GetPostUseCase
+    GetPostUseCase,
+    GetAllUsersUseCase,
+    GetUserByIdUseCase,
+    DeleteUserUseCase,
+    GetAllPostsUseCase,
+    DeletePostUseCase,
+    GetAllCommentsUseCase,
+    GetCommentByIdUseCase,
+    DeleteCommentUseCase
 )
 from infrastructure.database import db, UserModel, PostModel, CommentModel
 from interfaces.web.app import create_app
@@ -99,6 +107,95 @@ class TestUseCases:
         
         assert comment.id == 1
         mock_comment_repo.create.assert_called_once()
+    
+    def test_get_all_users(self):
+        mock_repo = MagicMock()
+        mock_repo.get_all.return_value = [
+            User(1, "user1", "user1@test.com"),
+            User(2, "user2", "user2@test.com")
+        ]
+        
+        use_case = GetAllUsersUseCase(mock_repo)
+        users = use_case.execute()
+        
+        assert len(users) == 2
+        assert users[0].username == "user1"
+        assert users[1].username == "user2"
+    
+    def test_get_user_by_id(self):
+        mock_repo = MagicMock()
+        mock_repo.get_by_id.return_value = User(1, "test", "test@example.com")
+        
+        use_case = GetUserByIdUseCase(mock_repo)
+        user = use_case.execute(1)
+        
+        assert user.id == 1
+        assert user.username == "test"
+    
+    def test_delete_user(self):
+        mock_repo = MagicMock()
+        mock_repo.get_by_id.return_value = User(1, "test", "test@example.com")
+        
+        use_case = DeleteUserUseCase(mock_repo)
+        use_case.execute(1)
+        
+        mock_repo.delete.assert_called_once_with(1)
+    
+    def test_get_all_posts(self):
+        mock_repo = MagicMock()
+        mock_repo.get_all.return_value = [
+            Post(1, "Post1", "Content1", 1),
+            Post(2, "Post2", "Content2", 1)
+        ]
+        
+        use_case = GetAllPostsUseCase(mock_repo)
+        posts = use_case.execute()
+        
+        assert len(posts) == 2
+        assert posts[0].title == "Post1"
+        assert posts[1].title == "Post2"
+    
+    def test_delete_post(self):
+        mock_repo = MagicMock()
+        mock_repo.get_by_id.return_value = Post(1, "Test", "Content", 1)
+        
+        use_case = DeletePostUseCase(mock_repo)
+        use_case.execute(1)
+        
+        mock_repo.delete.assert_called_once_with(1)
+    
+    def test_get_all_comments(self):
+        mock_repo = MagicMock()
+        mock_repo.get_all.return_value = [
+            Comment(1, "Comment1", 1, 1),
+            Comment(2, "Comment2", 1, 1)
+        ]
+        
+        use_case = GetAllCommentsUseCase(mock_repo)
+        comments = use_case.execute()
+        
+        assert len(comments) == 2
+        assert comments[0].content == "Comment1"
+        assert comments[1].content == "Comment2"
+    
+    def test_get_comment_by_id(self):
+        mock_repo = MagicMock()
+        mock_repo.get_by_id.return_value = Comment(1, "Nice", 1, 1)
+        
+        use_case = GetCommentByIdUseCase(mock_repo)
+        comment = use_case.execute(1)
+        
+        assert comment.id == 1
+        assert comment.content == "Nice"
+    
+    def test_delete_comment(self):
+        mock_repo = MagicMock()
+        mock_repo.get_by_id.return_value = Comment(1, "Test", 1, 1)
+        
+        use_case = DeleteCommentUseCase(mock_repo)
+        use_case.execute(1)
+        
+        mock_repo.delete.assert_called_once_with(1)
 
 
 class TestAPI:
@@ -189,6 +286,116 @@ class TestAPI:
         })
         assert response.status_code == 400
         assert response.json == {'error': 'Author with ID 999 does not exist'}
+    
+    def test_get_all_users(self, client):
+        client.post('/users', json={"username": "user1", "email": "user1@test.com"})
+        client.post('/users', json={"username": "user2", "email": "user2@test.com"})
+        
+        response = client.get('/users')
+        assert response.status_code == 200
+        data = response.json
+        assert len(data) >= 2
+        usernames = [user['username'] for user in data]
+        assert "user1" in usernames
+        assert "user2" in usernames
+    
+    def test_get_user_by_id(self, client):
+        user_resp = client.post('/users', json={"username": "testuser", "email": "test@example.com"})
+        user_id = user_resp.json['id']
+        
+        response = client.get(f'/users/{user_id}')
+        assert response.status_code == 200
+        data = response.json
+        assert data['id'] == user_id
+        assert data['username'] == "testuser"
+    
+    def test_delete_user(self, client):
+        user_resp = client.post('/users', json={"username": "todelete", "email": "delete@test.com"})
+        user_id = user_resp.json['id']
+        
+        response = client.delete(f'/users/{user_id}')
+        assert response.status_code == 204
+        
+        response = client.get(f'/users/{user_id}')
+        assert response.status_code == 404
+    
+    def test_get_all_posts(self, client):
+        user_resp = client.post('/users', json={"username": "author", "email": "author@test.com"})
+        user_id = user_resp.json['id']
+        
+        client.post('/posts', json={"title": "Post1", "content": "Content1", "author_id": user_id})
+        client.post('/posts', json={"title": "Post2", "content": "Content2", "author_id": user_id})
+        
+        response = client.get('/posts')
+        assert response.status_code == 200
+        data = response.json
+        assert len(data) >= 2
+        titles = [post['title'] for post in data]
+        assert "Post1" in titles
+        assert "Post2" in titles
+    
+    def test_delete_post(self, client):
+        user_resp = client.post('/users', json={"username": "author", "email": "author@test.com"})
+        user_id = user_resp.json['id']
+        
+        post_resp = client.post('/posts', json={"title": "To Delete", "content": "Content", "author_id": user_id})
+        post_id = post_resp.json['id']
+        
+        response = client.delete(f'/posts/{post_id}')
+        assert response.status_code == 204
+        
+        response = client.get(f'/posts/{post_id}')
+        assert response.status_code == 404
+    
+    def test_get_all_comments(self, client):
+        user_resp = client.post('/users', json={"username": "commenter", "email": "commenter@test.com"})
+        user_id = user_resp.json['id']
+        
+        post_resp = client.post('/posts', json={"title": "Post", "content": "Content", "author_id": user_id})
+        post_id = post_resp.json['id']
+        
+        client.post('/comments', json={"content": "Comment1", "post_id": post_id, "author_id": user_id})
+        client.post('/comments', json={"content": "Comment2", "post_id": post_id, "author_id": user_id})
+        
+        response = client.get('/comments')
+        assert response.status_code == 200
+        data = response.json
+        assert len(data) >= 2
+        contents = [comment['content'] for comment in data]
+        assert "Comment1" in contents
+        assert "Comment2" in contents
+    
+    def test_get_comment_by_id(self, client):
+        user_resp = client.post('/users', json={"username": "commenter", "email": "commenter@test.com"})
+        user_id = user_resp.json['id']
+        
+        post_resp = client.post('/posts', json={"title": "Post", "content": "Content", "author_id": user_id})
+        post_id = post_resp.json['id']
+        
+        comment_resp = client.post('/comments', json={"content": "Test comment", "post_id": post_id, "author_id": user_id})
+        comment_id = comment_resp.json['id']
+        
+        response = client.get(f'/comments/{comment_id}')
+        assert response.status_code == 200
+        data = response.json
+        assert data['id'] == comment_id
+        assert data['content'] == "Test comment"
+    
+    def test_delete_comment(self, client):
+        user_resp = client.post('/users', json={"username": "commenter", "email": "commenter@test.com"})
+        user_id = user_resp.json['id']
+        
+        post_resp = client.post('/posts', json={"title": "Post", "content": "Content", "author_id": user_id})
+        post_id = post_resp.json['id']
+        
+        comment_resp = client.post('/comments', json={"content": "To Delete", "post_id": post_id, "author_id": user_id})
+        comment_id = comment_resp.json['id']
+        
+        response = client.delete(f'/comments/{comment_id}')
+        assert response.status_code == 204
+        
+        response = client.get(f'/comments/{comment_id}')
+        assert response.status_code == 404
 
 
 class TestDatabase:
@@ -234,3 +441,47 @@ class TestDatabase:
             assert fetched.content == "Test comment"
             assert fetched.post_id == post.id
             assert fetched.author_id == user.id
+    
+    def test_cascade_delete_user(self, app):
+        with app.app_context():
+            user = UserModel(username="cascade_user", email="cascade@example.com")
+            db.session.add(user)
+            db.session.commit()
+            
+            post = PostModel(title="Cascade Post", content="Content", author_id=user.id)
+            db.session.add(post)
+            db.session.commit()
+            
+            comment = CommentModel(content="Cascade comment", post_id=post.id, author_id=user.id)
+            db.session.add(comment)
+            db.session.commit()
+            
+            db.session.delete(user)
+            db.session.commit()
+            
+            assert UserModel.query.get(user.id) is None
+            assert PostModel.query.get(post.id) is None
+            assert CommentModel.query.get(comment.id) is None
+    
+    def test_cascade_delete_post(self, app):
+        with app.app_context():
+            user = UserModel(username="author", email="author@example.com")
+            db.session.add(user)
+            db.session.commit()
+            
+            post = PostModel(title="Post", content="Content", author_id=user.id)
+            db.session.add(post)
+            db.session.commit()
+            
+            comment = CommentModel(content="Comment", post_id=post.id, author_id=user.id)
+            db.session.add(comment)
+            db.session.commit()
+            
+            db.session.delete(post)
+            db.session.commit()
+            
+
+            assert PostModel.query.get(post.id) is None
+            assert CommentModel.query.get(comment.id) is None
+
+            assert UserModel.query.get(user.id) is not None

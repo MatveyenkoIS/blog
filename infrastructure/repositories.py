@@ -22,6 +22,16 @@ class SQLUserRepository(IUserRepository):
                 username=user_model.username,
                 email=user_model.email
             )
+    
+    def get_all(self):
+        users = UserModel.query.all()
+        return [User(id=u.id, username=u.username, email=u.email) for u in users]
+    
+    def delete(self, user_id):
+        user = UserModel.query.get(user_id)
+        if user:
+            db.session.delete(user)
+            db.session.commit()
 
 
 class SQLPostRepository(IPostRepository):
@@ -49,6 +59,16 @@ class SQLPostRepository(IPostRepository):
                 content=post_model.content,
                 author_id=post_model.author_id
             )
+    
+    def get_all(self):
+        posts = PostModel.query.all()
+        return [Post(id=p.id, title=p.title, content=p.content, author_id=p.author_id) for p in posts]
+
+    def delete(self, post_id):
+        post = PostModel.query.get(post_id)
+        if post:
+            db.session.delete(post)
+            db.session.commit()
 
 
 class SQLCommentRepository(ICommentRepository):
@@ -66,3 +86,28 @@ class SQLCommentRepository(ICommentRepository):
             post_id=comment_model.post_id,
             author_id=comment_model.author_id
         )
+    
+    def get_all(self):
+        comments = CommentModel.query.all()
+        return [Comment(
+            id=c.id,
+            content=c.content,
+            post_id=c.post_id,
+            author_id=c.author_id
+        ) for c in comments]
+
+    def get_by_id(self, comment_id):
+        comment = CommentModel.query.get(comment_id)
+        if comment:
+            return Comment(
+                id=comment.id,
+                content=comment.content,
+                post_id=comment.post_id,
+                author_id=comment.author_id
+            )
+
+    def delete(self, comment_id):
+        comment = CommentModel.query.get(comment_id)
+        if comment:
+            db.session.delete(comment)
+            db.session.commit()

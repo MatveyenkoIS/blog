@@ -6,12 +6,15 @@ class UserModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    posts = db.relationship('PostModel', backref='author', cascade='all, delete-orphan')
+    comments = db.relationship('CommentModel', backref='author', cascade='all, delete-orphan')
 
 class PostModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey('user_model.id'), nullable=False)
+    comments = db.relationship('CommentModel', backref='post', cascade='all, delete-orphan')
 
 class CommentModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)

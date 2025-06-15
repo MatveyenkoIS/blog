@@ -50,3 +50,59 @@ class GetPostUseCase:
     
     def execute(self, post_id):
         return self.post_repo.get_by_id(post_id)
+
+class GetAllUsersUseCase:
+    def __init__(self, user_repo: IUserRepository):
+        self.user_repo = user_repo
+    
+    def execute(self):
+        return self.user_repo.get_all()
+
+class GetUserByIdUseCase:
+    def __init__(self, user_repo: IUserRepository):
+        self.user_repo = user_repo
+    
+    def execute(self, user_id):
+        return self.user_repo.get_by_id(user_id)
+
+class DeleteUserUseCase:
+    def __init__(self, user_repo: IUserRepository):
+        self.user_repo = user_repo
+    
+    def execute(self, user_id):
+        return self.user_repo.delete(user_id)
+
+class GetAllPostsUseCase:
+    def __init__(self, post_repo: IPostRepository):
+        self.post_repo = post_repo
+    
+    def execute(self):
+        return self.post_repo.get_all()
+
+class DeletePostUseCase:
+    def __init__(self, post_repo: IPostRepository):
+        self.post_repo = post_repo
+    
+    def execute(self, post_id):
+        return self.post_repo.delete(post_id)
+
+class GetAllCommentsUseCase:
+    def __init__(self, comment_repo: ICommentRepository):
+        self.comment_repo = comment_repo
+    
+    def execute(self):
+        return self.comment_repo.get_all()
+
+class GetCommentByIdUseCase:
+    def __init__(self, comment_repo: ICommentRepository):
+        self.comment_repo = comment_repo
+    
+    def execute(self, comment_id):
+        return self.comment_repo.get_by_id(comment_id)
+
+class DeleteCommentUseCase:
+    def __init__(self, comment_repo: ICommentRepository):
+        self.comment_repo = comment_repo
+    
+    def execute(self, comment_id):
+        return self.comment_repo.delete(comment_id)
