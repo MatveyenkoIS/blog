@@ -4,12 +4,50 @@
     "name": "Blog API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "variable": [
+    {
+      "key": "user_id",
+      "value": ""
+    },
+    {
+      "key": "post_id",
+      "value": ""
+    },
+    {
+      "key": "comment_id",
+      "value": ""
+    }
+  ],
   "item": [
     {
-      "name": "Create User",
+      "name": "1. Create User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function() {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Response has user ID\", function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.id).to.be.a('number');",
+              "    pm.collectionVariables.set(\"user_id\", jsonData.id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "body": {
           "mode": "raw",
           "raw": "{\n    \"username\": \"test_user\",\n    \"email\": \"test@example.com\"\n}"
@@ -18,7 +56,7 @@
       }
     },
     {
-      "name": "Get All Users",
+      "name": "2. Get All Users",
       "request": {
         "method": "GET",
         "header": [],
@@ -26,35 +64,51 @@
       }
     },
     {
-      "name": "Get User by ID",
+      "name": "3. Get User By ID",
       "request": {
         "method": "GET",
         "header": [],
-        "url": "http://localhost:5000/users/1"
+        "url": "http://localhost:5000/users/{{user_id}}"
       }
     },
     {
-      "name": "Delete User",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": "http://localhost:5000/users/1"
-      }
-    },
-    {
-      "name": "Create Post",
+      "name": "4. Create Post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function() {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Response has post ID\", function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.id).to.be.a('number');",
+              "    pm.collectionVariables.set(\"post_id\", jsonData.id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"title\": \"First Post\",\n    \"content\": \"Hello World!\",\n    \"author_id\": 1\n}"
+          "raw": "{\n    \"title\": \"First Post\",\n    \"content\": \"Hello World!\",\n    \"author_id\": {{user_id}}\n}"
         },
         "url": "http://localhost:5000/posts"
       }
     },
     {
-      "name": "Get All Posts",
+      "name": "5. Get All Posts",
       "request": {
         "method": "GET",
         "header": [],
@@ -62,35 +116,51 @@
       }
     },
     {
-      "name": "Get Post by ID",
+      "name": "6. Get Post by ID",
       "request": {
         "method": "GET",
         "header": [],
-        "url": "http://localhost:5000/posts/1"
+        "url": "http://localhost:5000/posts/{{post_id}}"
       }
     },
     {
-      "name": "Delete Post",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": "http://localhost:5000/posts/1"
-      }
-    },
-    {
-      "name": "Create Comment",
+      "name": "7. Create Comment",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function() {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Response has comment ID\", function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.id).to.be.a('number');",
+              "    pm.collectionVariables.set(\"comment_id\", jsonData.id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"content\": \"Nice post!\",\n    \"post_id\": 1,\n    \"author_id\": 1\n}"
+          "raw": "{\n    \"content\": \"Nice post!\",\n    \"post_id\": {{post_id}},\n    \"author_id\": {{user_id}}\n}"
         },
         "url": "http://localhost:5000/comments"
       }
     },
     {
-      "name": "Get All Comments",
+      "name": "8. Get All Comments",
       "request": {
         "method": "GET",
         "header": [],
@@ -98,19 +168,35 @@
       }
     },
     {
-      "name": "Get Comment by ID",
+      "name": "9. Get Comment by ID",
       "request": {
         "method": "GET",
         "header": [],
-        "url": "http://localhost:5000/comments/1"
+        "url": "http://localhost:5000/comments/{{comment_id}}"
       }
     },
     {
-      "name": "Delete Comment",
+      "name": "10. Delete Comment",
       "request": {
         "method": "DELETE",
         "header": [],
-        "url": "http://localhost:5000/comments/1"
+        "url": "http://localhost:5000/comments/{{comment_id}}"
+      }
+    },
+    {
+      "name": "11. Delete Post",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "http://localhost:5000/posts/{{post_id}}"
+      }
+    },
+    {
+      "name": "12. Delete User",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "http://localhost:5000/users/{{user_id}}"
       }
     }
   ]
