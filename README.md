@@ -84,7 +84,7 @@ python run.py
 
 Для проекта была создана Swagger-документация с использованием расширения Flasgger. Ознакомиться с ней можно по ссылке ниже (*предварительно запустите проект с помощью* ```python run.py```).
 
-Ссылка: [http://localhost:5000/apidocs]
+Ссылка: [http://localhost:5000/apidocs](http://localhost:5000/apidocs)
 
 ![](https://github.com/MatveyenkoIS/blog/raw/main/images/swagger.png)
 
@@ -96,7 +96,7 @@ python run.py
 pytest tests/
 ```
 
-2. Для работы с коллекцией Postman необходимо установить Postman Desktop с [https://www.postman.com/downloads/](официального сайта).
+2. Для работы с коллекцией Postman необходимо установить Postman Desktop с [официального сайта](https://www.postman.com/downloads/).
 
 3. Запустите проект, если до этого он у вас был отключён, командой
 
