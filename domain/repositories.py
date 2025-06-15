@@ -1,44 +1,77 @@
 from abc import ABC, abstractmethod
-from typing import List, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from domain.entities import User, Post, Comment
 
+
 class IUserRepository(ABC):
-    @abstractmethod
-    def create(self, user: 'User'): pass
+    """Интерфейс репозитория для работы с пользователями."""
     
     @abstractmethod
-    def get_all(self) -> List['User']: pass
+    def create(self, user: 'User') -> 'User':
+        """Создать нового пользователя."""
+        pass
     
     @abstractmethod
-    def get_by_id(self, user_id: int) -> 'User': pass
+    def get_all(self) -> List['User']:
+        """Получить всех пользователей."""
+        pass
     
     @abstractmethod
-    def delete(self, user_id: int): pass
+    def get_by_id(self, user_id: int) -> Optional['User']:
+        """Получить пользователя по ID."""
+        pass
+    
+    @abstractmethod
+    def delete(self, user_id: int) -> None:
+        """Удалить пользователя по ID."""
+        pass
+
 
 class IPostRepository(ABC):
-    @abstractmethod
-    def create(self, post: 'Post'): pass
+    """Интерфейс репозитория для работы с публикациями."""
     
     @abstractmethod
-    def get_all(self) -> List['Post']: pass
+    def create(self, post: 'Post') -> 'Post':
+        """Создать новую публикацию."""
+        pass
     
     @abstractmethod
-    def get_by_id(self, post_id: int) -> 'Post': pass
+    def get_all(self) -> List['Post']:
+        """Получить все публикации."""
+        pass
     
     @abstractmethod
-    def delete(self, post_id: int): pass
+    def get_by_id(self, post_id: int) -> Optional['Post']:
+        """Получить публикацию по ID."""
+        pass
+    
+    @abstractmethod
+    def delete(self, post_id: int) -> None:
+        """Удалить публикацию по ID."""
+        pass
+
 
 class ICommentRepository(ABC):
-    @abstractmethod
-    def create(self, comment: 'Comment'): pass
+    """Интерфейс репозитория для работы с комментариями."""
     
     @abstractmethod
-    def get_all(self) -> List['Comment']: pass
+    def create(self, comment: 'Comment') -> 'Comment':
+        """Создать новый комментарий."""
+        pass
     
     @abstractmethod
-    def get_by_id(self, comment_id: int) -> 'Comment': pass
+    def get_all(self) -> List['Comment']:
+        """Получить все комментарии."""
+        pass
     
     @abstractmethod
-    def delete(self, comment_id: int): pass
+    def get_by_id(self, comment_id: int) -> Optional['Comment']:
+        """Получить комментарий по ID."""
+        pass
+    
+    @abstractmethod
+    def delete(self, comment_id: int) -> None:
+        """Удалить комментарий по ID."""
+        pass

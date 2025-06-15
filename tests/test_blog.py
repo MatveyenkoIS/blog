@@ -21,6 +21,7 @@ from interfaces.web.app import create_app
 
 @pytest.fixture
 def app():
+    """Фикстура для создания тестового приложения."""
     app = create_app()
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
@@ -33,10 +34,13 @@ def app():
 
 @pytest.fixture
 def client(app):
+    """Фикстура для создания тестового клиента."""
     return app.test_client()
 
 
 class TestUseCases:
+    """Тесты сценариев использования."""
+    
     def test_create_user(self):
         mock_repo = MagicMock()
         mock_repo.create.return_value = User(1, "test", "test@example.com")
@@ -199,6 +203,8 @@ class TestUseCases:
 
 
 class TestAPI:
+    """Тесты API эндпоинтов."""
+    
     def test_create_user(self, client):
         response = client.post('/users', json={
             "username": "testuser",
@@ -251,7 +257,7 @@ class TestAPI:
     def test_get_nonexistent_post(self, client):
         response = client.get('/posts/999')
         assert response.status_code == 404
-        assert response.json == {'error': 'Post not found'}
+        assert response.json == {'error': 'Публикация не найдена'}
 
     def test_create_comment(self, client):
         user_resp = client.post('/users', json={
@@ -285,7 +291,8 @@ class TestAPI:
             "author_id": 999
         })
         assert response.status_code == 400
-        assert response.json == {'error': 'Author with ID 999 does not exist'}
+        # Заменить на русское сообщение
+        assert response.json == {'error': 'Автор с ID 999 не существует'}
     
     def test_get_all_users(self, client):
         client.post('/users', json={"username": "user1", "email": "user1@test.com"})
@@ -399,6 +406,8 @@ class TestAPI:
 
 
 class TestDatabase:
+    """Тесты работы с базой данных."""
+    
     def test_user_model(self, app):
         with app.app_context():
             user = UserModel(username="dbuser", email="dbuser@example.com")
@@ -480,8 +489,6 @@ class TestDatabase:
             db.session.delete(post)
             db.session.commit()
             
-
             assert PostModel.query.get(post.id) is None
             assert CommentModel.query.get(comment.id) is None
-
             assert UserModel.query.get(user.id) is not None

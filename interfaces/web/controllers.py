@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, current_app
 from application.use_cases import (
     CreateUserUseCase, 
     CreatePostUseCase, 
-    CreateCommentUseCase, 
+    CreateCommentUseCase,
     GetPostUseCase,
     GetAllUsersUseCase,
     GetUserByIdUseCase,
@@ -21,10 +21,12 @@ from infrastructure.repositories import (
 
 bp = Blueprint('controllers', __name__)
 
+# Инициализация репозиториев
 user_repo = SQLUserRepository()
 post_repo = SQLPostRepository()
 comment_repo = SQLCommentRepository()
 
+# Инициализация сценариев использования
 create_user_uc = CreateUserUseCase(user_repo)
 create_post_uc = CreatePostUseCase(post_repo, user_repo)
 create_comment_uc = CreateCommentUseCase(comment_repo, post_repo, user_repo)
@@ -42,13 +44,13 @@ delete_comment_uc = DeleteCommentUseCase(comment_repo)
 @bp.route('/')
 def index():
     """
-    API Information
+    Информация о API.
     ---
     tags:
       - general
     responses:
       200:
-        description: API information
+        description: Информация о API
         schema:
           type: object
           properties:
@@ -58,7 +60,7 @@ def index():
               type: object
     """
     return jsonify({
-        'message': 'Welcome to Blog API',
+        'message': 'Добро пожаловать в Blog API',
         'endpoints': {
             'create_user': 'POST /users',
             'create_post': 'POST /posts',
@@ -71,7 +73,7 @@ def index():
 @bp.route('/users', methods=['POST'])
 def create_user():
     """
-    Create a new user
+    Создать нового пользователя.
     ---
     tags:
       - users
@@ -92,7 +94,7 @@ def create_user():
               example: test@example.com
     responses:
       201:
-        description: User created
+        description: Пользователь создан
         schema:
           type: object
           properties:
@@ -115,7 +117,7 @@ def create_user():
 @bp.route('/posts', methods=['POST'])
 def create_post():
     """
-    Create a new post
+    Создать новую публикацию.
     ---
     tags:
       - posts
@@ -131,16 +133,16 @@ def create_post():
           properties:
             title:
               type: string
-              example: First Post
+              example: Первая публикация
             content:
               type: string
-              example: Hello World!
+              example: Привет мир!
             author_id:
               type: integer
               example: 1
     responses:
       201:
-        description: Post created
+        description: Публикация создана
         schema:
           type: object
           properties:
@@ -153,14 +155,14 @@ def create_post():
             author_id:
               type: integer
       400:
-        description: Invalid input
+        description: Неверные входные данные
         schema:
           type: object
           properties:
             error:
               type: string
       500:
-        description: Internal server error
+        description: Внутренняя ошибка сервера
     """
     data = request.json
     try:
@@ -178,14 +180,14 @@ def create_post():
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
     except Exception as e:
-        current_app.logger.error(f"Error creating post: {str(e)}")
-        return jsonify({'error': 'Internal server error'}), 500
+        current_app.logger.error(f"Ошибка при создании публикации: {str(e)}")
+        return jsonify({'error': 'Внутренняя ошибка сервера'}), 500
 
 
 @bp.route('/posts/<int:post_id>', methods=['GET'])
 def get_post(post_id):
     """
-    Get a post by ID
+    Получить публикацию по ID.
     ---
     tags:
       - posts
@@ -196,7 +198,7 @@ def get_post(post_id):
         required: true
     responses:
       200:
-        description: Post found
+        description: Публикация найдена
         schema:
           type: object
           properties:
@@ -209,7 +211,7 @@ def get_post(post_id):
             author_id:
               type: integer
       404:
-        description: Post not found
+        description: Публикация не найдена
     """
     post = get_post_uc.execute(post_id)
     if post:
@@ -219,13 +221,13 @@ def get_post(post_id):
             'content': post.content,
             'author_id': post.author_id
         })
-    return jsonify({'error': 'Post not found'}), 404
+    return jsonify({'error': 'Публикация не найдена'}), 404
 
 
 @bp.route('/comments', methods=['POST'])
 def create_comment():
     """
-    Create a new comment
+    Создать новый комментарий.
     ---
     tags:
       - comments
@@ -241,7 +243,7 @@ def create_comment():
           properties:
             content:
               type: string
-              example: Nice post!
+              example: Отличная публикация!
             post_id:
               type: integer
               example: 1
@@ -250,7 +252,7 @@ def create_comment():
               example: 1
     responses:
       201:
-        description: Comment created
+        description: Комментарий создан
         schema:
           type: object
           properties:
@@ -276,16 +278,17 @@ def create_comment():
         'author_id': comment.author_id
     }), 201
 
+
 @bp.route('/users', methods=['GET'])
 def get_all_users():
     """
-    Get all users
+    Получить всех пользователей.
     ---
     tags:
       - users
     responses:
       200:
-        description: List of users
+        description: Список пользователей
         schema:
           type: array
           items:
@@ -305,10 +308,11 @@ def get_all_users():
         'email': u.email
     } for u in users])
 
+
 @bp.route('/users/<int:user_id>', methods=['GET'])
 def get_user(user_id):
     """
-    Get a user by ID
+    Получить пользователя по ID.
     ---
     tags:
       - users
@@ -319,7 +323,7 @@ def get_user(user_id):
         required: true
     responses:
       200:
-        description: User found
+        description: Пользователь найден
         schema:
           type: object
           properties:
@@ -330,7 +334,7 @@ def get_user(user_id):
             email:
               type: string
       404:
-        description: User not found
+        description: Пользователь не найден
     """
     user = get_user_by_id_uc.execute(user_id)
     if user:
@@ -339,12 +343,13 @@ def get_user(user_id):
             'username': user.username,
             'email': user.email
         })
-    return jsonify({'error': 'User not found'}), 404
+    return jsonify({'error': 'Пользователь не найден'}), 404
+
 
 @bp.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     """
-    Delete a user by ID
+    Удалить пользователя по ID.
     ---
     tags:
       - users
@@ -355,27 +360,28 @@ def delete_user(user_id):
         required: true
     responses:
       204:
-        description: User deleted
+        description: Пользователь удален
       404:
-        description: User not found
+        description: Пользователь не найден
     """
     user = get_user_by_id_uc.execute(user_id)
     if not user:
-        return jsonify({'error': 'User not found'}), 404
+        return jsonify({'error': 'Пользователь не найден'}), 404
     
     delete_user_uc.execute(user_id)
     return '', 204
 
+
 @bp.route('/posts', methods=['GET'])
 def get_all_posts():
     """
-    Get all posts
+    Получить все публикации.
     ---
     tags:
       - posts
     responses:
       200:
-        description: List of posts
+        description: Список публикаций
         schema:
           type: array
           items:
@@ -398,10 +404,11 @@ def get_all_posts():
         'author_id': p.author_id
     } for p in posts])
 
+
 @bp.route('/posts/<int:post_id>', methods=['DELETE'])
 def delete_post(post_id):
     """
-    Delete a post by ID
+    Удалить публикацию по ID.
     ---
     tags:
       - posts
@@ -412,27 +419,28 @@ def delete_post(post_id):
         required: true
     responses:
       204:
-        description: Post deleted
+        description: Публикация удалена
       404:
-        description: Post not found
+        description: Публикация не найдена
     """
     post = get_post_uc.execute(post_id)
     if not post:
-        return jsonify({'error': 'Post not found'}), 404
+        return jsonify({'error': 'Публикация не найдена'}), 404
     
     delete_post_uc.execute(post_id)
     return '', 204
 
+
 @bp.route('/comments', methods=['GET'])
 def get_all_comments():
     """
-    Get all comments
+    Получить все комментарии.
     ---
     tags:
       - comments
     responses:
       200:
-        description: List of comments
+        description: Список комментариев
         schema:
           type: array
           items:
@@ -455,10 +463,11 @@ def get_all_comments():
         'author_id': c.author_id
     } for c in comments])
 
+
 @bp.route('/comments/<int:comment_id>', methods=['GET'])
 def get_comment(comment_id):
     """
-    Get a comment by ID
+    Получить комментарий по ID.
     ---
     tags:
       - comments
@@ -469,7 +478,7 @@ def get_comment(comment_id):
         required: true
     responses:
       200:
-        description: Comment found
+        description: Комментарий найден
         schema:
           type: object
           properties:
@@ -482,7 +491,7 @@ def get_comment(comment_id):
             author_id:
               type: integer
       404:
-        description: Comment not found
+        description: Комментарий не найден
     """
     comment = get_comment_by_id_uc.execute(comment_id)
     if comment:
@@ -492,12 +501,13 @@ def get_comment(comment_id):
             'post_id': comment.post_id,
             'author_id': comment.author_id
         })
-    return jsonify({'error': 'Comment not found'}), 404
+    return jsonify({'error': 'Комментарий не найден'}), 404
+
 
 @bp.route('/comments/<int:comment_id>', methods=['DELETE'])
 def delete_comment(comment_id):
     """
-    Delete a comment by ID
+    Удалить комментарий по ID.
     ---
     tags:
       - comments
@@ -508,13 +518,13 @@ def delete_comment(comment_id):
         required: true
     responses:
       204:
-        description: Comment deleted
+        description: Комментарий удален
       404:
-        description: Comment not found
+        description: Комментарий не найден
     """
     comment = get_comment_by_id_uc.execute(comment_id)
     if not comment:
-        return jsonify({'error': 'Comment not found'}), 404
+        return jsonify({'error': 'Комментарий не найден'}), 404
     
     delete_comment_uc.execute(comment_id)
     return '', 204
